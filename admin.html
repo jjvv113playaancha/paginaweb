@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel de administración — Junta de Vecinos 113</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="stylesheet" href="css/styles.css">
+<style>
+  .admin-wrap { max-width: 720px; margin: 0 auto; padding: 56px 24px 80px; }
+  .admin-box {
+    background: var(--white); border: 1px solid var(--line);
+    border-radius: 14px; padding: 32px;
+  }
+  .admin-box + .admin-box { margin-top: 24px; }
+  .admin-title { font-family: var(--display); font-weight: 700; color: var(--navy); margin: 0 0 6px; font-size: 1.3rem; }
+  .admin-sub { color: var(--muted); font-size: 0.9rem; margin: 0 0 22px; }
+  .slot-row {
+    display: flex; align-items: center; gap: 18px;
+    padding: 16px 0; border-bottom: 1px solid var(--line);
+  }
+  .slot-row:last-child { border-bottom: none; }
+  .slot-preview {
+    width: 96px; height: 64px; border-radius: 8px; object-fit: cover;
+    background: var(--bg-soft); border: 1px solid var(--line); flex-shrink: 0;
+  }
+  .slot-info { flex: 1; }
+  .slot-info .name { font-weight: 700; color: var(--navy); font-size: 0.95rem; margin: 0 0 2px; }
+  .slot-info .desc { color: var(--muted); font-size: 0.82rem; margin: 0; }
+  .slot-status { font-size: 0.78rem; margin-top: 4px; }
+  .slot-status.ok { color: var(--green); }
+  .slot-status.err { color: #C0392B; }
+  input[type=file] { font-size: 0.85rem; }
+  #login-error { color: #C0392B; font-size: 0.85rem; margin-top: 10px; }
+  #logout-btn { margin-top: 20px; }
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap nav-row">
+    <a href="index.html" class="brand">
+      <svg class="brand-mark" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="24" cy="12" r="6" fill="#4F8C3B"/>
+        <circle cx="10" cy="18" r="5" fill="#1B3A5B"/>
+        <circle cx="38" cy="18" r="5" fill="#1B3A5B"/>
+        <path d="M24 20c-7 0-12 5-12 12v10h24V32c0-7-5-12-12-12Z" fill="#4F8C3B"/>
+        <path d="M10 23c-5 0-9 4-9 9v9h9V28c0-2 .6-3.8 1.7-5.3A9 9 0 0 0 10 23Z" fill="#1B3A5B"/>
+        <path d="M38 23c5 0 9 4 9 9v9h-9V28c0-2-.6-3.8-1.7-5.3A9 9 0 0 1 38 23Z" fill="#1B3A5B"/>
+      </svg>
+      <span class="brand-text">Junta de Vecinos<span class="num">113</span></span>
+    </a>
+    <span style="font-family: var(--body); font-weight: 700; color: var(--navy); font-size: 0.9rem;">Panel de administración</span>
+  </div>
+</header>
+
+<div class="admin-wrap">
+
+  <div class="admin-box" id="login-box">
+    <h1 class="admin-title">Iniciar sesión</h1>
+    <p class="admin-sub">Acceso solo para la directiva. Usa el correo y contraseña creados en Supabase.</p>
+    <form id="login-form" class="contact-form">
+      <div class="field">
+        <label for="email">Correo</label>
+        <input type="email" id="email" required>
+      </div>
+      <div class="field">
+        <label for="password">Contraseña</label>
+        <input type="password" id="password" required>
+      </div>
+      <button type="submit" class="btn-cta" style="align-self:flex-start; border:none; cursor:pointer;">Entrar</button>
+      <p id="login-error"></p>
+    </form>
+  </div>
+
+  <div class="admin-box" id="panel-box" style="display:none;">
+    <h1 class="admin-title">Imágenes del sitio</h1>
+    <p class="admin-sub">Sube una nueva imagen para reemplazar la actual. El cambio se refleja en el sitio en segundos.</p>
+
+    <div id="slots"></div>
+
+    <button id="logout-btn" class="btn-socio" style="border:none; cursor:pointer;">Cerrar sesión</button>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase-config.js"></script>
+<script>
+  // Llaves de imagen editables. Para agregar una nueva imagen administrable,
+  // suma un objeto aquí y usa la misma "key" como data-img-key en el HTML del sitio.
+  const IMAGE_SLOTS = [
+    { key: 'hero', name: 'Foto principal (portada)', desc: 'Imagen de fondo del hero en Inicio. Ideal formato horizontal.' },
+    { key: 'nosotros_hero', name: 'Foto sección Nosotros', desc: 'Imagen de portada de la página "Nosotros".' },
+    { key: 'galeria_1', name: 'Galería — foto 1', desc: 'Primera foto del carrete de la Galería.' },
+  ];
+
+  let supabase;
+  let currentUser = null;
+
+  function initSupabase() {
+    if (typeof SUPABASE_URL === 'undefined' || SUPABASE_URL.includes('PEGA_AQUI')) {
+      document.getElementById('login-error').textContent =
+        'Falta configurar SUPABASE_URL y SUPABASE_ANON_KEY en js/supabase-config.js';
+      return false;
+    }
+    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    return true;
+  }
+
+  function publicUrl(key) {
+    return `${SUPABASE_URL}/storage/v1/object/public/${IMAGES_BUCKET}/${key}?t=${Date.now()}`;
+  }
+
+  function renderSlots() {
+    const container = document.getElementById('slots');
+    container.innerHTML = '';
+    IMAGE_SLOTS.forEach((slot) => {
+      const row = document.createElement('div');
+      row.className = 'slot-row';
+      row.innerHTML = `
+        <img class="slot-preview" id="preview-${slot.key}" src="${publicUrl(slot.key)}" onerror="this.style.opacity=0.3">
+        <div class="slot-info">
+          <p class="name">${slot.name}</p>
+          <p class="desc">${slot.desc}</p>
+          <input type="file" accept="image/*" id="file-${slot.key}">
+          <p class="slot-status" id="status-${slot.key}"></p>
+        </div>
+      `;
+      container.appendChild(row);
+
+      document.getElementById(`file-${slot.key}`).addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) uploadImage(slot.key, file);
+      });
+    });
+  }
+
+  async function uploadImage(key, file) {
+    const status = document.getElementById(`status-${key}`);
+    status.textContent = 'Subiendo...';
+    status.className = 'slot-status';
+
+    const ext = file.name.split('.').pop();
+    const path = `${key}.${ext}`;
+
+    const { error } = await supabase.storage
+      .from(IMAGES_BUCKET)
+      .upload(path, file, { upsert: true, cacheControl: '0' });
+
+    if (error) {
+      status.textContent = 'Error al subir: ' + error.message;
+      status.className = 'slot-status err';
+      return;
+    }
+
+    status.textContent = 'Imagen actualizada correctamente.';
+    status.className = 'slot-status ok';
+    document.getElementById(`preview-${key}`).src = publicUrl(key.split('.')[0] === key ? path : path);
+    document.getElementById(`preview-${key}`).src = `${SUPABASE_URL}/storage/v1/object/public/${IMAGES_BUCKET}/${path}?t=${Date.now()}`;
+  }
+
+  async function checkSession() {
+    const { data } = await supabase.auth.getSession();
+    if (data.session) {
+      currentUser = data.session.user;
+      document.getElementById('login-box').style.display = 'none';
+      document.getElementById('panel-box').style.display = 'block';
+      renderSlots();
+    }
+  }
+
+  document.getElementById('login-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    const errEl = document.getElementById('login-error');
+    errEl.textContent = '';
+
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) {
+      errEl.textContent = 'Correo o contraseña incorrectos.';
+      return;
+    }
+    currentUser = data.user;
+    document.getElementById('login-box').style.display = 'none';
+    document.getElementById('panel-box').style.display = 'block';
+    renderSlots();
+  });
+
+  document.getElementById('logout-btn').addEventListener('click', async () => {
+    await supabase.auth.signOut();
+    location.reload();
+  });
+
+  if (initSupabase()) {
+    checkSession();
+  }
+</script>
+</body>
+</html>
