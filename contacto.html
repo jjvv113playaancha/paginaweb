@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contacto — Junta de Vecinos Villa Los Aromos</title>
+<meta name="description" content="Contacta a la directiva de la Junta de Vecinos Villa Los Aromos: dirección de la sede, horarios y formulario de contacto.">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<div class="banderines" aria-hidden="true">
+  <span></span><span></span><span></span><span></span><span></span>
+  <span></span><span></span><span></span><span></span><span></span>
+  <span></span><span></span><span></span><span></span><span></span>
+  <span></span><span></span><span></span><span></span><span></span>
+</div>
+
+<header class="site">
+  <div class="wrap nav-row">
+    <a href="index.html" class="brand">
+      <svg class="brand-mark" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M20 4L36 16V36H24V24H16V36H4V16L20 4Z" fill="#3C6E47" stroke="#20241F" stroke-width="2" stroke-linejoin="round"/>
+      </svg>
+      <span class="brand-text">Junta de Vecinos<small>Villa Los Aromos</small></span>
+    </a>
+    <button class="menu-toggle" aria-label="Abrir menú" aria-expanded="false">Menú</button>
+    <nav class="menu">
+      <a href="index.html">Inicio
+        <svg viewBox="0 0 100 6" preserveAspectRatio="none"><path d="M0 4 Q 12 0, 25 4 T 50 4 T 75 4 T 100 4" stroke="#C7642C" stroke-width="3" fill="none"/></svg>
+      </a>
+      <a href="noticias.html">Noticias
+        <svg viewBox="0 0 100 6" preserveAspectRatio="none"><path d="M0 4 Q 12 0, 25 4 T 50 4 T 75 4 T 100 4" stroke="#C7642C" stroke-width="3" fill="none"/></svg>
+      </a>
+      <a href="contacto.html" class="active">Contacto
+        <svg viewBox="0 0 100 6" preserveAspectRatio="none"><path d="M0 4 Q 12 0, 25 4 T 50 4 T 75 4 T 100 4" stroke="#C7642C" stroke-width="3" fill="none"/></svg>
+      </a>
+    </nav>
+  </div>
+</header>
+
+<section class="hero" style="padding-bottom: 32px;">
+  <div class="wrap">
+    <p class="eyebrow">Sección contacto</p>
+    <h1 style="font-size: clamp(2rem, 4vw, 2.8rem);">Habla con <em>tu directiva.</em></h1>
+    <p class="lead">Consultas, solicitudes de certificados o propuestas para el barrio. Escríbenos y te respondemos a la brevedad.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap contact-grid">
+    <div>
+      <ul class="info-list">
+        <li><span class="label">Sede</span><span>Calle Los Aromos 1234, sede vecinal</span></li>
+        <li><span class="label">Horario</span><span>Martes y jueves, 18:00 – 20:00 h</span></li>
+        <li><span class="label">Teléfono</span><span>+56 9 1234 5678</span></li>
+        <li><span class="label">Correo</span><span>contacto@juntavecinoslosaromos.cl</span></li>
+      </ul>
+      <div class="card">
+        <h3>¿Buscas un certificado de residencia?</h3>
+        <p>Tráelo solicitado con nombre completo, RUT y dirección exacta. Se emite en 48 horas hábiles y se retira en la sede.</p>
+      </div>
+    </div>
+
+    <form class="contact-form">
+      <div class="field">
+        <label for="nombre">Nombre completo</label>
+        <input type="text" id="nombre" name="nombre" required>
+      </div>
+      <div class="field">
+        <label for="correo">Correo electrónico</label>
+        <input type="email" id="correo" name="correo" required>
+      </div>
+      <div class="field">
+        <label for="motivo">Motivo</label>
+        <input type="text" id="motivo" name="motivo" placeholder="Ej: certificado de residencia, propuesta, reclamo">
+      </div>
+      <div class="field">
+        <label for="mensaje">Mensaje</label>
+        <textarea id="mensaje" name="mensaje" required></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary" style="align-self: flex-start;">Enviar mensaje</button>
+      <p class="form-status form-note"></p>
+    </form>
+  </div>
+</section>
+
+<footer class="site">
+  <div class="wrap footer-row">
+    <p>© 2026 Junta de Vecinos Villa Los Aromos</p>
+    <div class="footer-links">
+      <a href="index.html">Inicio</a>
+      <a href="noticias.html">Noticias</a>
+      <a href="contacto.html">Contacto</a>
+    </div>
+  </div>
+</footer>
+
+<script src="js/main.js"></script>
+</body>
+</html>
